@@ -1,0 +1,31 @@
+services:
+  core:
+    build:
+      context: .
+    ports:
+      - "9000:80"
+    volumes:
+      - ./core:/var/www/core
+  core-db:
+    image: mariadb:11.1.2
+    restart: always
+    environment:
+      - MYSQL_DATABASE=core_db
+      - MYSQL_USER_FILE=/run/secrets/db-user-name
+      - MYSQL_PASSWORD_FILE=/run/secrets/db-user-password
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-root-password
+    volumes:
+      - ./core/data/data_test:/docker-entrypoint-initdb.d
+    ports:
+      - "33060:3306"
+    secrets:
+      - db-root-password
+      - db-user-name
+      - db-user-password
+secrets:
+  db-root-password:
+    file: root_password.txt
+  db-user-name:
+    file: user_name.txt    
+  db-user-password:
+    file: user_password.txt
