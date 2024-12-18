@@ -7,6 +7,8 @@ use Illuminate\View\View;
 use App\Models\Task;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
@@ -72,7 +74,21 @@ class TaskController extends Controller
      */
     public function show(string $id)
     {
+    }
 
+    public function publish(Request $request, string $id)
+    {
+        $task = Task::find($id);
+        if (!$task) return new Response('Lack task');
+        
+        if ($request->user()->cannot('update', $task)) {
+            abort(403);
+        }
+
+        $task->uuid = (string) Str::uuid();
+        $task->expire = Carbon::now()->addWeek();
+        $task->save();
+        return Redirect::route('item.list');
     }
 
     /**

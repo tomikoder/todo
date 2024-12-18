@@ -19,7 +19,6 @@ return new class extends Migration
             $table->enum('priority', ['low','medium', 'high']);
             $table->enum('status', ['to-do', 'in progress', 'done'])->default('to-do');
             $table->date('deadline');
-            $table->boolean('is_public')->default(false);
             $table->foreignId('user_id')->constrained();
         });
     }
