@@ -26,6 +26,11 @@
     @endforeach
   </select><br>
   <button type="submit">Send</button>
-</form> 
+</form>
+
+<form method="POST" action={{ route('logout') }}>
+  @csrf
+  <button type="submit">Logout</button>
+</form>
 
 

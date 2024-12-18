@@ -11,9 +11,14 @@ Route::get('/', function () {
 Route::get('/list',[TaskController::class, 'index'])->middleware('auth')
   ->name('item.list');
 
-Route::get('/get/{id}',[TaskController::class, 'show'])->middleware('auth')
+Route::get('/get/{id}',[TaskController::class, 'edit'])->middleware('auth')
   ->where('id', '[0-9]+')
   ->name('item.get');
+
+Route::post('/get/{id}',[TaskController::class, 'update'])->middleware('auth')
+  ->where('id', '[0-9]+')
+  ->name('item.get.update');
+
 
 Route::get('/list/add',[TaskController::class, 'create'])->middleware('auth')
   ->name('item.add.form');

@@ -11,7 +11,8 @@ class Task extends Model
         'name',
         'priority',
         'deadline',
-        'description'
+        'description',
+        'status'
     ];
 
     protected $hidden = [
