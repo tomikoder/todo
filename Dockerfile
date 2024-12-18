@@ -10,7 +10,7 @@ RUN apt update -y && apt upgrade -y && \
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     HASH="$(wget -q -O - https://composer.github.io/installer.sig)" && \
     php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
-    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && apt install git -y
+    php composer-setup.php --install-dir=/usr/local/bin --filename=composer && apt install git -y && apt install nodejs -y && apt install npm -y
 COPY core_conf /etc/nginx/sites-available
 COPY core_pool.conf /etc/php/8.2/fpm/pool.d
 RUN echo  'source /root/.bashrc \n\
