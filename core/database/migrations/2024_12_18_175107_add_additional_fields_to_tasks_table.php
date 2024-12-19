@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->uuid('uuid')->unique()->nullable(true); 
-            $table->dateTime('expire');
+            $table->date('expire')->nullable(true);
         });
     }
 

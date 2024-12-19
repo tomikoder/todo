@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Task;
+use App\Models\TaskHistory;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -33,8 +33,10 @@ class TaskController extends Controller
 
         return view('menu.list', [
             'tasks' => $tasks,
-            'priorities' => self::PRIORITIES,
-            'statuses' => self::STATUSES,
+            'form' => [
+                'priorities' => self::PRIORITIES,
+                'statuses' => self::STATUSES,    
+            ]
         ]);
     }
 
@@ -55,31 +57,40 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $dataToInsert = $request->validate([
             'name' => 'required|unique:tasks|max:255',
             'description' => 'required|max:255',
             'priority' => 'required|string|in:' . $this->formatPriorities(),
             'deadline' => 'required|date|after_or_equal:today',
         ]);
 
-        $validated['user_id'] = $request->user()->id;
-
-        Task::create($validated);
+        $dataToInsert['user_id'] = $request->user()->id;
+        $task = Task::create($dataToInsert);
+        $this->saveInHistory($dataToInsert, $task);
 
         return Redirect::route('item.list');
+    }
+
+    private function saveInHistory(array $dataToInsert, Task $task): void
+    {
+        $dataToInsert['task_id'] = $task->id;
+        TaskHistory::create($dataToInsert);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $uuid)
     {
+        $task = Task::where('uuid', $uuid)
+            ->where('expire', '>=', now())
+            ->firstOrFail();
+        return view('menu.show', ['task' => $task]);
     }
 
     public function publish(Request $request, string $id)
     {
-        $task = Task::find($id);
-        if (!$task) return new Response('Lack task');
+        $task = Task::findOrFail($id);
         
         if ($request->user()->cannot('update', $task)) {
             abort(403);
@@ -96,8 +107,7 @@ class TaskController extends Controller
      */
     public function edit(Request $request, string $id)
     {
-        $task = Task::find($id);
-        if (!$task) return new Response('Lack task');
+        $task = Task::findOrFail($id);
         
         if ($request->user()->cannot('update', $task)) {
             abort(403);
@@ -117,14 +127,13 @@ class TaskController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $task = Task::find($id);
+        $task = Task::findOrFail($id);
 
         if ($request->user()->cannot('update', $task)) {
             abort(403);
         }
 
-        if (!$task) return new Response('Lack task');
-        $validated = $request->validate([
+        $dataToInsert = $request->validate([
             'name' => 'required|max:255',
             'description' => 'required|max:255',
             'priority' => 'required|string|in:' . $this->formatPriorities(),
@@ -132,7 +141,9 @@ class TaskController extends Controller
             'status'  => 'required|string|in:' . $this->formatStatuses()
         ]);
         
-        $task->update($validated);
+        $task->update($dataToInsert);
+        $dataToInsert['task_id'] = $task->id;
+        $this->saveInHistory($dataToInsert, $task);
         return Redirect::route('item.list');
     }
 
@@ -149,8 +160,26 @@ class TaskController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        // Implement the destroy functionality
+        $task = Task::findOrFail($id);
+        
+        if ($request->user()->cannot('delete', $task)) {
+            abort(403);
+        }
+        
+        $task->delete();
+        return Redirect::route('item.list');
+    }
+
+    public function history(Request $request, string $id)
+    {
+        $task = Task::findOrFail(id: $id);
+        
+        if ($request->user()->cannot('showHistory', $task)) {
+            abort(403);
+        }
+
+        return view('menu.history', ['task' => $task]);
     }
 }

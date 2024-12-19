@@ -15,12 +15,13 @@ class Task extends Model
         'status'
     ];
 
-    protected $hidden = [
-        'status',
-        'user_id',
-    ];
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function taskHistory()
+    {
+        return $this->hasMany(TaskHistory::class, 'task_id');
     }
 }
