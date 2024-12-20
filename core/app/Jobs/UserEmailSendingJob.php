@@ -27,8 +27,9 @@ class UserEmailSendingJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $tasks = Task::whereDate('deadline', Carbon::today())
+        $tasks = Task::whereDate('deadline', Carbon::tomorrow())
             ->where('send_notify', true)
+            ->whereNot('status', 'done')
             ->get();
         foreach ($tasks as $task) {
             $task->send_notify = false;
