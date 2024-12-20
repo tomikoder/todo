@@ -9,7 +9,6 @@ use App\Models\TaskHistory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-use App\Jobs\UserEmailSendingJob;
 
 class TaskController extends Controller
 {
@@ -140,6 +139,7 @@ class TaskController extends Controller
             'status'  => 'required|string|in:' . $this->formatStatuses()
         ]);
         
+        $dataToInsert['send_notify'] = true;
         $task->update($dataToInsert);
         $dataToInsert['task_id'] = $task->id;
         $this->saveInHistory($dataToInsert, $task);

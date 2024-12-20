@@ -12,7 +12,8 @@ class Task extends Model
         'priority',
         'deadline',
         'description',
-        'status'
+        'status',
+        'send_notify'
     ];
 
     public function user()

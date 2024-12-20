@@ -3,11 +3,11 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Task;
 
 class NotifyEmail extends Mailable
 {
@@ -16,9 +16,8 @@ class NotifyEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(private Task $task) 
     {
-        //
     }
 
     /**
@@ -38,6 +37,7 @@ class NotifyEmail extends Mailable
     {
         return new Content(
             view: 'email.notify',
+            with: ['task' => $this->task]
         );
     }
 

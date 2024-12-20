@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>lol</title>
+    <title>Przypomninie</title>
 </head>
 <body>
-    <h1>Testowy e-mail w Laravel</h1>
-    <p>To jest testowy e-mail wysłany z aplikacji Laravel!</p>
+    <h1>Przypomnienie</h1>
+    <h3 style="color: red;">Deadline {{ $task->deadline }}</h3>
+    <p>{{ $task->name }}</p>
+
 </body>
 </html>
