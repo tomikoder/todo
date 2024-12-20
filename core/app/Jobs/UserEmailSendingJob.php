@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
+use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use App\Models\Task;
-use App\Mail\NotifyEmail;
 use Illuminate\Support\Facades\Mail;
-use Carbon\Carbon;
+use App\Mail\NotifyEmail;
+use App\Models\Task;
 
 class UserEmailSendingJob implements ShouldQueue
 {
@@ -16,7 +18,8 @@ class UserEmailSendingJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct() {
+    public function __construct()
+    {
     }
 
     /**
