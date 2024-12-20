@@ -9,6 +9,7 @@ use App\Models\TaskHistory;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Jobs\UserEmailSendingJob;
 
 class TaskController extends Controller
 {
@@ -22,7 +23,6 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $tasks = $request->user()->tasks;
-
         foreach ($request->query as $key => $val) {
             if (!in_array($key, self::QUERY_PARAMS) || !$val) {
                 continue;
@@ -58,7 +58,7 @@ class TaskController extends Controller
     public function store(Request $request)
     {
         $dataToInsert = $request->validate([
-            'name' => 'required|unique:tasks|max:255',
+            'name' => 'required|max:255',
             'description' => 'required|max:255',
             'priority' => 'required|string|in:' . $this->formatPriorities(),
             'deadline' => 'required|date|after_or_equal:today',
@@ -67,7 +67,6 @@ class TaskController extends Controller
         $dataToInsert['user_id'] = $request->user()->id;
         $task = Task::create($dataToInsert);
         $this->saveInHistory($dataToInsert, $task);
-
         return Redirect::route('item.list');
     }
 

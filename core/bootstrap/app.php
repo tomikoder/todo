@@ -4,8 +4,14 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\RedirectIfAuthenticatedCustom;
+use Illuminate\Console\Scheduling\Schedule;
+use App\Jobs\SendMailManager;
+use App\Jobs\UserEmailSendingJob;
 
 return Application::configure(basePath: dirname(__DIR__))
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->job(new UserEmailSendingJob())->everyMinute();;
+    })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',

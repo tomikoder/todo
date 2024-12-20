@@ -11,6 +11,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     HASH="$(wget -q -O - https://composer.github.io/installer.sig)" && \
     php -r "if (hash_file('SHA384', 'composer-setup.php') === '$HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && apt install git -y && apt install nodejs -y && apt install npm -y
+RUN apt update -y && apt upgrade -y && apt-get install -y php8.2-cli cron 
 COPY core_conf /etc/nginx/sites-available
 COPY core_pool.conf /etc/php/8.2/fpm/pool.d
 RUN echo  'source /root/.bashrc \n\
@@ -19,8 +20,11 @@ RUN echo  'source /root/.bashrc \n\
            cd /var/www/core || exit \n\
            composer install && composer update \n\
            fi' > /root/initial_setup.sh
+RUN echo '* * * * * root /usr/bin/php /var/www/core/artisan schedule:run >> /dev/null 2>&1' > /etc/cron.d/artisan-cron
+RUN echo 'php artisan queue:work &' > /root/start.sh
 WORKDIR /var/www/core
 COPY ./core .
 RUN ln -s /etc/nginx/sites-available/core_conf /etc/nginx/sites-enabled/ && \
-    chown root /root/initial_setup.sh && chmod 500 /root/initial_setup.sh
-CMD ["/bin/bash", "-c",  "/root/initial_setup.sh && service php8.2-fpm start && service nginx restart && sleep infinity"]
+    chown root /root/initial_setup.sh && chmod 500 /root/initial_setup.sh && chown root /etc/cron.d/artisan-cron && \
+    crontab /etc/cron.d/artisan-cron && chmod +x /root/start.sh
+CMD ["/bin/bash", "-c",  "/root/initial_setup.sh && service php8.2-fpm start && service nginx restart && cron && /root/start.sh && sleep infinity"]
