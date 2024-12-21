@@ -6,10 +6,10 @@ namespace App\Listeners;
 
 use Carbon\Carbon;
 use Spatie\GoogleCalendar\Event;
+use App\Events\Interfaces\GoogleCalendarEventInterface;
 use App\Events\TaskAdded;
 use App\Events\TaskDeleted;
 use App\Events\TaskUpdated;
-use App\Events\Interfaces\GoogleCalendarEventInterface;
 use App\Models\Task;
 
 class HandleGoogleCalendar
@@ -27,7 +27,7 @@ class HandleGoogleCalendar
      */
     public function handle(GoogleCalendarEventInterface $event): void
     {
-        $task = $event?->task;
+        $task = $event->task;
         if ($event instanceof TaskAdded) {
             $googleEvent = new Event();
             $this->updateEvent($googleEvent, $task);
@@ -51,6 +51,6 @@ class HandleGoogleCalendar
             ->addHours($endTime->hour)
             ->addMinutes($endTime->minute);
         $googleEvent->name = $task->name;
-        $googleEvent->save();   
+        $googleEvent->save();
     }
 }

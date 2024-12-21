@@ -16,7 +16,8 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
            if [[ -z "${IS_INIT}" ]]; then \n\
            echo IS_INIT=1 | cat >> /root/.bashrc \n\
            cd /var/www/core \n\
-           composer install && composer update && php artisan migrate \n\
+           composer install && composer update && php artisan migrate && npm install && npm run build && \n\
+           chown -R www-data:www-data /var/www/core \n\
            fi' > /root/initial_setup.sh && \
     echo '* * * * * root /usr/bin/php /var/www/core/artisan schedule:run >> /dev/null 2>&1' > /etc/cron.d/artisan-cron && \
     echo 'php artisan queue:work &' > /root/start.sh && \

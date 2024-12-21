@@ -1,0 +1,1 @@
+Do poprawnego działania aplikacji potrzeba tylko dodanie trzech plików z danymi userów dla kontenera db. Przykłady są w głównym folderze. Trzeba też ustawić DB_HOST=core-db. Czasami są problemy z pobieraniem danych dla obrazu, i trzeba pare razy próbować.

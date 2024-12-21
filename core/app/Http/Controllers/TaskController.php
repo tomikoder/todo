@@ -27,7 +27,9 @@ class TaskController extends Controller
             if (!in_array($key, self::QUERY_PARAMS) || !$val) {
                 continue;
             }
-            if ($key == self::QUERY_PARAMS[1]) $val = Carbon::parse($val);
+            if ($key == self::QUERY_PARAMS[1]) {
+                $val = Carbon::parse($val);
+            }
             $tasks = $tasks->where($key, $val);
         }
 
@@ -61,13 +63,13 @@ class TaskController extends Controller
         $rules = [
             'name' => 'required|max:255',
             'description' => 'required|max:255',
-            'priority' => 'required|string|in:' . TaskConstants::formatPriorities(),
+            'priority' => 'required|string|in:' . implode(separator: ',', array: TaskConstants::PRIORITIES),
             'start_time' => 'required|date|after_or_equal:today',
-            'req_time' => 'required|date_format:H:i' 
+            'req_time' => 'required|date_format:H:i'
         ];
 
         if ($includeStatus) {
-            $rules['status'] = 'required|string|in:' . TaskConstants::formatStatuses();
+            $rules['status'] = 'required|string|in:' . implode(separator: ',', array: TaskConstants::STATUSES);
         }
 
         return $rules;
@@ -163,7 +165,7 @@ class TaskController extends Controller
         if ($request->user()->cannot('delete', $task)) {
             abort(403);
         }
-        
+
         event(new TaskDeleted($task));
         $task->delete();
         return Redirect::route('item.list');
