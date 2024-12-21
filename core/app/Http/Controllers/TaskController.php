@@ -10,18 +10,16 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use App\Constants\TaskConstants;
 use App\Models\Task;
-use App\Models\TaskHistory;
+use App\Events\TaskAdded;
+use App\Events\TaskUpdated;
+use App\Events\TaskDeleted;
 
 class TaskController extends Controller
 {
-    private const QUERY_PARAMS = ['status', 'deadline', 'priority'];
-    private const PRIORITIES = ['low', 'medium', 'high'];
-    private const STATUSES = ['to-do', 'in progress', 'done'];
+    private const QUERY_PARAMS = ['status', 'start_time', 'priority'];
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): View
     {
         $tasks = $request->user()->tasks;
@@ -29,15 +27,15 @@ class TaskController extends Controller
             if (!in_array($key, self::QUERY_PARAMS) || !$val) {
                 continue;
             }
-
+            if ($key == self::QUERY_PARAMS[1]) $val = Carbon::parse($val);
             $tasks = $tasks->where($key, $val);
         }
 
         return view('menu.list', [
             'tasks' => $tasks,
             'form' => [
-                'priorities' => self::PRIORITIES,
-                'statuses' => self::STATUSES,
+                'priorities' => TaskConstants::PRIORITIES,
+                'statuses' => TaskConstants::STATUSES,
             ]
         ]);
     }
@@ -49,25 +47,30 @@ class TaskController extends Controller
     {
         return view('menu.add', [
             'form' => [
-                'priorities' => self::PRIORITIES,
+                'priorities' => TaskConstants::PRIORITIES,
             ]
         ]);
     }
 
-    private function saveInHistory(array $dataToInsert, Task $task): void
-    {
-        $dataToInsert['task_id'] = $task->id;
-        TaskHistory::create($dataToInsert);
-    }
+    /**
+     * Display a listing of the resource.
+     */
 
-    private function formatStatuses(): string
+    private function validationRules(bool $includeStatus = false): array
     {
-        return implode(',', self::STATUSES);
-    }
+        $rules = [
+            'name' => 'required|max:255',
+            'description' => 'required|max:255',
+            'priority' => 'required|string|in:' . TaskConstants::formatPriorities(),
+            'start_time' => 'required|date|after_or_equal:today',
+            'req_time' => 'required|date_format:H:i' 
+        ];
 
-    private function formatPriorities(): string
-    {
-        return implode(',', self::PRIORITIES);
+        if ($includeStatus) {
+            $rules['status'] = 'required|string|in:' . TaskConstants::formatStatuses();
+        }
+
+        return $rules;
     }
 
     /**
@@ -75,16 +78,13 @@ class TaskController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $dataToInsert = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'required|max:255',
-            'priority' => 'required|string|in:' . $this->formatPriorities(),
-            'deadline' => 'required|date|after_or_equal:today',
-        ]);
-
-        $dataToInsert['user_id'] = $request->user()->id;
-        $task = Task::create($dataToInsert);
-        $this->saveInHistory($dataToInsert, $task);
+        $dataToInsert = $request->validate($this->validationRules());
+        $task = new Task();
+        $task->fill($dataToInsert);
+        $task->user_id = $request->user()->id;
+        $task->save();
+        $task->history()->create($dataToInsert);
+        event(new TaskAdded($task));
         return Redirect::route('item.list');
     }
 
@@ -99,18 +99,12 @@ class TaskController extends Controller
             abort(403);
         }
 
-        $dataToInsert = $request->validate([
-            'name' => 'required|max:255',
-            'description' => 'required|max:255',
-            'priority' => 'required|string|in:' . $this->formatPriorities(),
-            'deadline' => 'required|date|after_or_equal:today',
-            'status'  => 'required|string|in:' . $this->formatStatuses()
-        ]);
+        $dataToInsert = $request->validate($this->validationRules(true));
 
         $dataToInsert['send_notify'] = true;
         $task->update($dataToInsert);
-        $dataToInsert['task_id'] = $task->id;
-        $this->saveInHistory($dataToInsert, $task);
+        $task->history()->create($dataToInsert);
+        event(new TaskUpdated($task));
         return Redirect::route('item.list');
     }
 
@@ -153,8 +147,8 @@ class TaskController extends Controller
         return view('menu.get', [
             'task' => $task,
             'form' => [
-                'priorities' => self::PRIORITIES,
-                'statuses' => self::STATUSES
+                'priorities' => TaskConstants::PRIORITIES,
+                'statuses' => TaskConstants::STATUSES
             ],
         ]);
     }
@@ -169,7 +163,8 @@ class TaskController extends Controller
         if ($request->user()->cannot('delete', $task)) {
             abort(403);
         }
-
+        
+        event(new TaskDeleted($task));
         $task->delete();
         return Redirect::route('item.list');
     }

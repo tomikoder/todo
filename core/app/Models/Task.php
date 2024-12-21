@@ -11,18 +11,23 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Task extends Model
 {
     protected $fillable = [
-        'user_id',
         'name',
         'priority',
-        'deadline',
         'description',
         'status',
-        'send_notify'
+        'send_notify',
+        'start_time',
+        'req_time'
     ];
 
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function history(): HasMany
+    {
+        return $this->hasMany(TaskHistory::class);
     }
 
     public function taskHistory(): HasMany

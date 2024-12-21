@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Constants\TaskConstants;
 
 return new class extends Migration
 {
@@ -16,9 +17,10 @@ return new class extends Migration
             $table->timestamps();
             $table->string('name');
             $table->string('description');
-            $table->enum('priority', ['low','medium', 'high']);
-            $table->enum('status', ['to-do', 'in progress', 'done'])->default('to-do');
-            $table->date('deadline');
+            $table->enum('priority', TaskConstants::PRIORITIES);
+            $table->enum('status', TaskConstants::STATUSES)->default(TaskConstants::STATUSES[0]);
+            $table->datetime('start_time');
+            $table->time('req_time');
             $table->foreignId('user_id')->constrained();
         });
     }

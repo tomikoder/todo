@@ -17,7 +17,8 @@ return new class extends Migration
             $table->string('description');
             $table->enum('priority', ['low','medium', 'high']);
             $table->enum('status', ['to-do', 'in progress', 'done']);
-            $table->date('deadline');
+            $table->datetime('start_time');
+            $table->time('req_time');
             $table->foreignId('task_id')->constrained()->onDelete('cascade');;        
         });
     }

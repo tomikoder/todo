@@ -20,10 +20,15 @@
   @if ($errors->has('priority'))
   <div style="color: red;" class="error">{{ $errors->first('priority') }}</div>
   @endif
-  <label for="deadline">Deadline:</label><br>
-  <input type="date" id="deadline" name="deadline"><br>
-  @if ($errors->has('deadline'))
-  <div style="color: red;" class="error">{{ $errors->first('deadline') }}</div>
+  <label for="start_time">Start time:</label><br>
+  <input type="datetime-local" id="start_time" name="start_time"><br>
+  @if ($errors->has('start_time'))
+  <div style="color: red;" class="error">{{ $errors->first('start_time') }}</div>
+  @endif
+  <label for="req_time">Required time:</label><br>
+  <input type="time" id="req_time" name="req_time"><br>
+  @if ($errors->has('req_time'))
+  <div style="color: red;" class="error">{{ $errors->first('req_time') }}</div>
   @endif
   <button type="submit">Send</button>
 </form> 

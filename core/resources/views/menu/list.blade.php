@@ -8,7 +8,7 @@
 <ul>
     @foreach ($tasks as $task)
     <li>
-      <a href={{ route('item.get', ['id' => $task->id]) }}>{{ $task->name }}/{{ $task->priority }}/{{ $task->deadline }}/{{ $task->status }}</a>&nbsp;&nbsp;&nbsp;
+      <a href={{ route('item.get', ['id' => $task->id]) }}>{{ $task->name }}/{{ $task->priority }}/{{ $task->start_time }}/{{ $task->status }}</a>&nbsp;&nbsp;&nbsp;
       @if ($task->uuid != null && $currentDate <= $task->expire)
       <a href={{ route('item.show', ['uuid' => $task->uuid]) }}>Link</a>&nbsp;&nbsp;&nbsp;
       @endif
@@ -34,8 +34,8 @@
     <option value={{ $priority }}>{{ $priority }}</option>
     @endforeach
   </select><br>
-  <label for="deadline">Sort date:</label><br>
-  <input type="date" id="deadline" name="deadline"><br>
+  <label for="start_time">Sort date:</label><br>
+  <input type="datetime-local" id="start_time" name="start_time"><br>
   <label for="status">Sort status:</label><br>
   <select name="status" id="status"><br>
     <option value=""></option>

@@ -15,6 +15,7 @@ class TaskHistory extends Model
         'deadline',
         'description',
         'status',
-        'task_id'
+        'start_time',
+        'req_time'
     ];
 }
