@@ -6,6 +6,8 @@ services:
       - "9000:80"
     volumes:
       - ./core:/var/www/core
+    depends_on:
+      - core-db
   core-db:
     image: mariadb:11.1.2
     restart: always

@@ -25,25 +25,25 @@
     @endforeach
 </ul>
 
-<h3>Sort</h3>
+<h3>Filtr</h3>
 <form method="GET">
-  <label for="priority">Sorta priority:</label><br>
+  <label for="priority">Filtr priority:</label><br>
   <select name="priority" id="priority"><br>
    <option value=""></option>
     @foreach ($form['priorities'] as $priority)
     <option value={{ $priority }}>{{ $priority }}</option>
     @endforeach
   </select><br>
-  <label for="start_time">Sort date:</label><br>
+  <label for="start_time">Filtr date:</label><br>
   <input type="datetime-local" id="start_time" name="start_time"><br>
-  <label for="status">Sort status:</label><br>
+  <label for="status">Filtr status:</label><br>
   <select name="status" id="status"><br>
     <option value=""></option>
     @foreach ($form['statuses'] as $status)
     <option value="{{ $status }}">{{ $status }}</option>
     @endforeach
   </select><br>
-  <button type="submit">Send</button>
+  <button type="submit">Filtr</button>
 </form>
 
 <br><br><br>
